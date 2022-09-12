@@ -281,4 +281,102 @@ function addEmployee() {
         });
     });
   }
+
+  function updateEmployeeRole() {
+    // Select the employee to update.
+    db.query(`SELECT * FROM employee`, (err, res) => {
+      if (err) throw err;
+      let employees = res.map((employee) => ({
+        name: `${employee.first_name} ${employee.last_name}`,
+        value: employee.id,
+      }));
+  
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "employee",
+            message: "Which employee's role would you like to update?",
+            choices: employees,
+          },
+        ])
+        .then((answer) => {
+          let updatedEmployee = answer.employee;
+  
+          // Select the new department.
+          db.query("SELECT * FROM department", (err, res) => {
+            if (err) throw err;
+            let departments = res.map((department) => ({
+              name: department.department_name,
+              value: department.id,
+            }));
+  
+            inquirer
+              .prompt([
+                {
+                  type: "list",
+                  name: "department",
+                  message: "Which department is this employee's new role in?",
+                  choices: departments,
+                },
+              ])
+              .then((answer) => {
+                let departmentId = answer.department;
+  
+                // Select the new role.
+                db.query(
+                  `SELECT * FROM roles WHERE department_id = ${departmentId}`,
+                  (err, res) => {
+                    if (err) throw err;
+                    let roles = res.map((role) => ({
+                      name: role.title,
+                      value: role.id,
+                    }));
+  
+                    inquirer
+                      .prompt([
+                        {
+                          type: "list",
+                          name: "role",
+                          message: "What will this employee's new role be?",
+                          choices: roles,
+                        },
+                        {
+                          type: "list",
+                          name: "newManager",
+                          message:
+                            "Would you like to allocate a new manager to this employee?",
+                          choices: [
+                            { name: "Yes, select a new manager", value: "yes" },
+                            { name: "No, return to menu", value: "no" },
+                          ],
+                        },
+                      ])
+                      .then((answer) => {  
+                        db.query(`UPDATE employee SET role_id = "${answer.role}" WHERE employee.id = "${updatedEmployee}"`, (err, res) => {
+                          if (err) throw err;
+                          console.log(`Employee role updated.`)
+                        })
+  
+                        if (answer.newManager === "yes") {
+                          console.log("Selected yet: but feature to change manager not yet built in current version of application.");
+                
+                        } else if (answer.newManager === "no") {
+                          selectTask();
+                        }
+                      });
+                  }
+                );
+              });
+          });
+        });
+    });
+  }
+
+  function closeApp () {
+    process.exit();
+  }
+  
+  start();
+  
   
