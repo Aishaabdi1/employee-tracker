@@ -111,3 +111,24 @@ function viewDepartments() {
       }
     );
   }
+
+  function createDepartment() {
+    inquirer
+      .prompt([
+        {
+          name: "name",
+          message: "What would you like to call your new department?",
+        },
+      ])
+      .then((res) => {
+        const name = res.name;
+        db.query(
+          `INSERT INTO department (department_name) VALUES ("${name}")`,
+          (err) => {
+            if (err) throw err;
+            console.log(`Department ${name} created.`);
+            selectTask();
+          }
+        );
+      });
+  }
