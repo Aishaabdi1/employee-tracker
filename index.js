@@ -179,3 +179,106 @@ function viewDepartments() {
         });
     });
   }
+
+
+function addEmployee() {
+    // Fetch list of the departments
+    db.query("SELECT * FROM department", (err, res) => {
+      if (err) throw err;
+      let departments = res.map((department) => ({
+        name: department.department_name,
+        value: department.id,
+      }));
+  
+      // Ask new employee name, then which department
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            name: "first_name",
+            message: "What is your new employee's first name?",
+          },
+          {
+            type: "input",
+            name: "last_name",
+            message: "What is your new employee's last name?",
+          },
+          {
+            type: "list",
+            name: "department",
+            message: "Which department will your new employee belong to?",
+            choices: departments,
+          },
+        ])
+        .then((answer) => {
+          let department = answer.department;
+          let employee = {
+            first_name: answer.first_name,
+            last_name: answer.last_name,
+          };
+  
+          // Query database for all roles from chosen department.
+          db.query(
+            `SELECT * FROM roles WHERE (department_id) = ("${department}")`,
+            (err, res) => {
+              if (err) throw err;
+              let roles = res.map((role) => ({
+                name: role.title,
+                value: role.id,
+              }));
+  
+              // Query Database for all staff
+              db.query(
+                `SELECT employee.id, employee.first_name, employee.last_name FROM employee JOIN roles ON employee.role_id = roles.id JOIN department ON roles.department_id = department.id WHERE department.id = "${department}"`,
+                (err, res) => {
+                  if (err) throw err;
+                  let managers = res.map((manager) => ({
+                    name: `${manager.first_name} ${manager.last_name}`,
+                    value: manager.id,
+                  }));
+  
+                  // Ask user which role and management to assign the new employee.
+                  inquirer
+                    .prompt([
+                      {
+                        type: "list",
+                        name: "role_id",
+                        message:
+                          "Which role would you like to assign to this employee?",
+                        choices: roles,
+                      },
+                      {
+                        type: "list",
+                        name: "manager_id",
+                        message:
+                          "Which member of this department would you like the new employee to report to?",
+                        choices: managers,
+                      },
+                    ])
+                    .then((answers) => {
+                      // Insert new employee data
+                      db.query(
+                        "INSERT INTO employee SET ?",
+                        {
+                          first_name: employee.first_name,
+                          last_name: employee.last_name,
+                          role_id: answers.role_id,
+                          manager_id: answers.manager_id,
+                        },
+                        (err, res) => {
+                          if (err) throw err;
+                          console.log(
+                            `${employee.first_name} ${employee.last_name} was successfully added to the database.`
+                          );
+                          selectTask();
+                        }
+                      );
+                    });
+                }
+              );
+            }
+          );
+        });
+    });
+  }
+  
