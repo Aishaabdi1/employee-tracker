@@ -5,10 +5,10 @@ const db = require("./config/connection");
 
 function start() {
     console.log("Welcome to the Employee Tracker.");
-    Task();
+    selectTask();
   }
   
-  function Task() {
+  function selectTask() {
     inquirer
       .prompt([
         {
