@@ -132,3 +132,50 @@ function viewDepartments() {
         );
       });
   }
+
+  function createRole() {
+    // Fetch all departments
+    db.query("SELECT * FROM department", (err, res) => {
+      if (err) throw err;
+      let department = res.map((departments) => ({
+        name: departments.department_name,
+        value: departments.id,
+      }));
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            name: "name",
+            message: "What would you like to call your new role?",
+          },
+          {
+            type: "list",
+            name: "department",
+            message: "Which department does your new role belong to?",
+            choices: department,
+          },
+          {
+            type: "input",
+            name: "salary",
+            message: " expected salary for the new role?",
+          },
+        ])
+        .then((answers) => {
+          db.query(
+            "INSERT INTO roles SET ?",
+            {
+              title: answers.name,
+              salary: answers.salary,
+              department_id: answers.department,
+            },
+            (err, res) => {
+              if (err) throw err;
+              console.log(
+                `${answers.name} was successfully added to the database.`
+              );
+              selectTask();
+            }
+          );
+        });
+    });
+  }
