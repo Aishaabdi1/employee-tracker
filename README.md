@@ -1,4 +1,7 @@
 # employee-tracker
+## Demo:
+
+https://drive.google.com/file/d/1561769CDTX9G3NZ0SsjWnPKqk5UvjpNK/view?usp=sharing
 
 ## Description
 
@@ -91,6 +94,3 @@ Node.js
 npmjs
 inquirer
 
-## Demo:
-
-https://drive.google.com/file/d/1561769CDTX9G3NZ0SsjWnPKqk5UvjpNK/view?usp=sharing
